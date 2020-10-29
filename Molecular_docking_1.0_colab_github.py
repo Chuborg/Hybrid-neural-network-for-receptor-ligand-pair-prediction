@@ -39,8 +39,8 @@ MOMENTUM = 0.9
 BATCH_SIZE = 64
 EPOCHS = 60
 
-X_ligand = torch.Tensor([i[0] for i in data]).view(-1, LIGAND_DIM * LIGAND_DIM)
-X_receptor = torch.Tensor([i[1] for i in data]).view(-1, 1, RECEPTOR_DIM, RECEPTOR_DIM)
+X_receptor = torch.Tensor([i[0] for i in data]).view(-1, 1, RECEPTOR_DIM, RECEPTOR_DIM)
+X_ligand = torch.Tensor([i[1] for i in data]).view(-1, LIGAND_DIM * LIGAND_DIM)
 y = torch.Tensor([i[2] for i in data])
 
 print("Receptors: ", len(X_receptor))
