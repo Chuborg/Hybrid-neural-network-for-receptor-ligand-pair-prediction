@@ -1,4 +1,3 @@
-# 91% accuracy
 from google.colab import drive # layout for google drive
 
 drive.mount('/content/drive') # mounting point for google drive
@@ -24,7 +23,8 @@ else:
     device = torch.device("cpu")
     print("Running on CPU")
 
-data = np.load("/content/drive/My Drive/Molecular docking/molecular_docking.npy", allow_pickle=True)
+# data = np.load("/content/drive/My Drive/Molecular docking/training_data.npy", allow_pickle=True)
+data = np.load("/content/drive/My Drive/Molecular docking/training_data_1000.npy", allow_pickle=True)
 """
 data[i][0] - receptor
 data[i][1] - ligand
@@ -34,17 +34,17 @@ data[i][2] - label
 # HYPERPARAMETERS
 RECEPTOR_DIM = 256
 LIGAND_DIM = 30
-LEARNING_RATE = 0.01
-MOMENTUM = 0.9
-BATCH_SIZE = 64
-EPOCHS = 60
+LEARNING_RATE = 0.025
+MOMENTUM = 0.70
+BATCH_SIZE = 128
+EPOCHS = 500 # 215
 
 X_receptor = torch.Tensor([i[0] for i in data]).view(-1, 1, RECEPTOR_DIM, RECEPTOR_DIM)
 X_ligand = torch.Tensor([i[1] for i in data]).view(-1, LIGAND_DIM * LIGAND_DIM)
 y = torch.Tensor([i[2] for i in data])
 
-print("Receptors: ", len(X_receptor))
-print("Ligands: ", len(X_ligand))
+print("Receptors: ", len(X_receptor), "shape: ", X_receptor.shape)
+print("Ligands: ", len(X_ligand), "shape: ", X_ligand.shape)
 print("Labels: ", len(y))
 
 
@@ -54,17 +54,18 @@ class TwoInputsNet(nn.Module):
         global RECEPTOR_DIM, LIGAND_DIM
         super(TwoInputsNet, self).__init__()
         # Set convolution layers for receptors
-        self.conv1 = nn.Conv2d(1, 128, 20)
-        self.conv2 = nn.Conv2d(128, 128, 5)
-        self.conv3 = nn.Conv2d(128, 256, 2)
+        self.conv1 = nn.Conv2d(1, 32, 10)
+        self.conv2 = nn.Conv2d(32, 64, 10)
+        self.conv3 = nn.Conv2d(64, 128, 10)
         self.pool1 = nn.MaxPool2d((10, 10))
-        self.pool2 = nn.MaxPool2d((5, 5))
         
         #Set fully connected layers for receptors
-        self.fc1 = nn.Linear(1024, 256) # Calculate input value first
-        self.fc2 = nn.Linear(256, 128)
-        self.fc3 = nn.Linear(128, 64)
-        self.fc4 = nn.Linear(64, 64)
+        self.fc1 = nn.Linear(4608, 1024) # Calculate input value first
+        self.fc2 = nn.Linear(1024, 512)
+        self.fc3 = nn.Linear(512, 64)
+        # self.fc4 = nn.Linear(256, 128)
+        # self.fc5 = nn.Linear(128, 128)
+        # self.fc6 = nn.Linear(128, 64)
         
         # Set fully connected layers for ligands
         self.fc10 = nn.Linear(LIGAND_DIM * LIGAND_DIM, 512) # Calculate input value first
@@ -83,14 +84,18 @@ class TwoInputsNet(nn.Module):
         r = F.relu(self.conv1(input1))
         r = self.pool1(r)
         r = F.relu(self.conv2(r))
-        r = self.pool2(r)
         r = F.relu(self.conv3(r))
+        # r = F.relu(self.conv4(r))
+        # r = F.relu(self.conv5(r))
+        # r = F.relu(self.conv6(r))
                 
         r = r.view(r.size(0), -1)
         r = F.relu(self.fc1(r))
         r = F.relu(self.fc2(r))
         r = F.relu(self.fc3(r))
-        r = F.relu(self.fc4(r))
+        # r = F.relu(self.fc4(r))
+        # r = F.relu(self.fc5(r))
+        # r = F.relu(self.fc6(r))
         
         # Ligands        
         l = F.relu(self.fc10(input2))
@@ -112,7 +117,9 @@ print(net)
 
 # Hybrid train
 # Define optimizer
-optimizer = optim.Adam(net.parameters(), lr=0.001)
+# optimizer = optim.Adam(net.parameters(), lr=LEARNING_RATE)
+# optimizer = optim.SGD(net.parameters(), momentum=MOMENTUM, lr=LEARNING_RATE)
+optimizer = optim.Adadelta(net.parameters(), lr=0.5, rho=0.9, eps=1e-06, weight_decay=0)
 loss_function = nn.MSELoss()
 
 VAL_PCT = 0.1
@@ -184,6 +191,6 @@ def test_1(net):
 
     print("Accuracy on test_1 samples: ", round(correct / total, 3))
     
-
+   
 train(net)
 test_1(net)
