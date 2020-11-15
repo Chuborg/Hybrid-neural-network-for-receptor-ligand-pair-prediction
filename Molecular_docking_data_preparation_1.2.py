@@ -15,7 +15,7 @@ class DataPreparation:
     ANNOTATIONS = "D:/Projects/Molecular docking (colab with Borodin)/DATA/BioLiP_2013-03-6.txt"
 
     
-    NUMBER_OF_SAMPLES = 3000
+    NUMBER_OF_SAMPLES = 3000 # The number of pairs we want to prepare
     
     count_receptors = 0
     count_ligands = 0
@@ -52,7 +52,7 @@ class DataPreparation:
 
         with open(self.ANNOTATIONS) as fh: # Open file and read N-lines
             cnt = 0
-            while cnt < self.NUMBER_OF_SAMPLES: # Set NUMBER_OF_SAMPLES or set True to read whole file
+            while cnt < self.NUMBER_OF_SAMPLES: # Set NUMBER_OF_SAMPLES or set "while True:" to read whole file
                 line = fh.readline()
                 tuple = line.split()
                 pdb_id = tuple[0]
@@ -101,7 +101,7 @@ class DataPreparation:
             self.training_data.append([receptor, ligand, np.eye(2)[0]])
             self.training_data.append([receptor, not_ligand, np.eye(2)[1]])
             
-        np.random.shuffle(self.training_data)
+        np.random.shuffle(self.training_data) # Not nessecary, can be commented.
         print("Number of train data: ", len(self.training_data))
         np.save("D:/Projects/Molecular docking (colab with Borodin)/DATA/training_data.npy", self.training_data)
         
