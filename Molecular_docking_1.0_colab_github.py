@@ -23,8 +23,8 @@ else:
     device = torch.device("cpu")
     print("Running on CPU")
 
-# data = np.load("/content/drive/My Drive/Molecular docking/training_data.npy", allow_pickle=True)
-data = np.load("/content/drive/My Drive/Molecular docking/training_data_1000.npy", allow_pickle=True)
+data = np.load("/content/drive/My Drive/Molecular docking/training_data.npy", allow_pickle=True)
+# data = np.load("/content/drive/My Drive/Molecular docking/training_data_1000.npy", allow_pickle=True)
 """
 data[i][0] - receptor
 data[i][1] - ligand
@@ -34,8 +34,8 @@ data[i][2] - label
 # HYPERPARAMETERS
 RECEPTOR_DIM = 256
 LIGAND_DIM = 30
-LEARNING_RATE = 0.025
-MOMENTUM = 0.70
+LEARNING_RATE = 0.025 # Check optimizer first
+MOMENTUM = 0.70 # For SGD
 BATCH_SIZE = 128
 EPOCHS = 500 # 215
 
